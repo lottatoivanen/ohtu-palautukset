@@ -24,3 +24,4 @@ class PlayerReader:
                 players.append(player)
 
         return players
+    

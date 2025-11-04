@@ -1,7 +1,18 @@
+import requests
 from player import Player
 
 def main():
-    pass
+    url = "https://studies.cs.helsinki.fi/nhlstats/2024-25/players"
+    response = requests.get(url).json()
+
+    players = [Player(player_dict) for player_dict in response]
+    nationality = "FIN"
+    chosen = [p for p in players if p.nationality == nationality]
+
+    print(f"Players from {nationality}:")
+
+    for player in chosen:
+        print(player)
 
 if __name__ == "__main__":
     main()
