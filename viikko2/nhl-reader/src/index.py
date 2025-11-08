@@ -34,8 +34,6 @@ def table(players, season, nationality):
     t.add_column("teams")
     t.add_column("goals")
     t.add_column("assists")
-    t.add_column("points")
-
     for p in players:
         summa = p.goals + p.assists
         t.add_row(f"[bright_cyan]{p.name}[/bright_cyan]", f"[hot_pink]{p.team}[/hot_pink]", f"[violet]{p.goals}[/violet]", f"[violet]{p.assists}[/violet]", f"[violet]{summa}[/violet]")
@@ -56,8 +54,9 @@ def main():
 
     players = stats.top_scorers_by_nationality(nationality)
 
-    table(players, season, nationality)
+    rprint("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
+    table(players, season, nationality)
 
 
 if __name__ == "__main__":
