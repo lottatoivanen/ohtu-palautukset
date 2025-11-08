@@ -1,19 +1,18 @@
-from rich import print
+from rich import print as rprint
 from rich.table import Table
 from rich import box
 from playerreader import PlayerReader
 from playerstats import PlayerStats
-
 
 seasons = ["2018-19", "2019-20", "2020-21", "2021-22", "2022-23", "2023-24", "2024-25", "2025-26"]
 
 def choose_season():
     seasonstr = "/".join(seasons)
     while True:
-        print(f"Season [[bright_magenta]{seasonstr}[/bright_magenta]]:")
+        rprint(f"Season [[bright_magenta]{seasonstr}[/bright_magenta]]:")
         season = input().strip()
         if season not in seasons:
-            print("Not a valid season. Please try again.")
+            rprint("Not a valid season. Please try again.")
         else:
             return season
 
@@ -22,10 +21,10 @@ def choose_nationality(reader):
     nationalities = sorted({p.nationality for p in players})
     nationalitystr = "/".join(nationalities)
     while True:
-        print(f"Nationality [[bright_magenta]{nationalitystr}[bright_magenta]]")
+        rprint(f"Nationality [[bright_magenta]{nationalitystr}[/bright_magenta]]")
         nationality = input().strip().upper()
         if nationality not in nationalities:
-            print("Not a valid nationality. Please try again.")
+            rprint("Not a valid nationality. Please try again.")
         else:
             return nationality
 
@@ -41,7 +40,7 @@ def table(players, season, nationality):
         summa = p.goals + p.assists
         t.add_row(f"[bright_cyan]{p.name}[/bright_cyan]", f"[hot_pink]{p.team}[/hot_pink]", f"[violet]{p.goals}[/violet]", f"[violet]{p.assists}[/violet]", f"[violet]{summa}[/violet]")
 
-    print(t)
+    rprint(t)
 
 
 def main():
