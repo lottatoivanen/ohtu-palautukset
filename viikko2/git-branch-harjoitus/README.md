@@ -1,3 +1,3 @@
 ## git-harjoituksia
 
-Harjoitellaan branchien käyttöä
+Harjoitellaan tässä branchien käyttöä
