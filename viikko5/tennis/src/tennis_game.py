@@ -14,7 +14,7 @@ class TennisGame:
         if player_name == "player1":
             self.player1_score = self.player1_score + 1
         else:
-            self.player2_score = self.player2_score + 1
+            self.player2_score += 1
 
     def get_score(self):
         if self.game_tie():
