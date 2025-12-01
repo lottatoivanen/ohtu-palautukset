@@ -34,7 +34,7 @@ class TennisGame:
         return f"{self.score_name(self.player1_score)}-All"
     
     def game_win(self):
-        return (self.player1_score >= self.MIN_POINTS_FOR_WIN or self.player2_score >= self.MIN_POINTS_FOR_WIN)
+        return self.player1_score >= self.MIN_POINTS_FOR_WIN or self.player2_score >= self.MIN_POINTS_FOR_WIN
     
     def win_result(self):
         difference = self.player1_score - self.player2_score
