@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Rock Paper Scissors - Game{% endblock %}
+
+{% block content %}
+<h1>🎮 {{ mode_name }}</h1>
+
+<div class="score-board">
+    <div class="score-item">
+        <div class="score-label">Player 1</div>
+        <div class="score-value" id="score1">0</div>
+    </div>
+    <div class="score-item">
+        <div class="score-label">Draws</div>
+        <div class="score-value" id="draws">0</div>
+    </div>
+    <div class="score-item">
+        <div class="score-label">Player 2</div>
+        <div class="score-value" id="score2">0</div>
+    </div>
+</div>
+
+<div class="game-board">
+    <div id="messageContainer"></div>
+    
+    <div class="player-section">
+        <div class="player-title">👤 Player 1 Move</div>
+        <div class="move-buttons">
+            <button class="move-btn" onclick="selectMove(this, 'k')" title="Rock">🪨<br><small>k</small></button>
+            <button class="move-btn" onclick="selectMove(this, 'p')" title="Paper">📄<br><small>p</small></button>
+            <button class="move-btn" onclick="selectMove(this, 's')" title="Scissors">✂️<br><small>s</small></button>
+        </div>
+        <div class="move-legend">
+            <span class="symbol">k = Rock (Kivi)</span>
+            <span class="symbol">p = Paper (Paperi)</span>
+            <span class="symbol">s = Scissors (Sakset)</span>
+        </div>
+    </div>
+    
+    {% if mode == 'a' %}
+    <div class="vs-text">VS</div>
+    
+    <div class="player-section">
+        <div class="player-title">👤 Player 2 Move</div>
+        <div class="move-buttons">
+            <button class="move-btn" onclick="selectMove2(this, 'k')" title="Rock">🪨<br><small>k</small></button>
+            <button class="move-btn" onclick="selectMove2(this, 'p')" title="Paper">📄<br><small>p</small></button>
+            <button class="move-btn" onclick="selectMove2(this, 's')" title="Scissors">✂️<br><small>s</small></button>
+        </div>
+    </div>
+    {% else %}
+    <div class="vs-text">🤖 VS Computer</div>
+    {% endif %}
+    
+    <div class="play-button-wrapper">
+        <div id="gameOverContainer"></div>
+        <button class="button btn-success" onclick="playRound()" id="playButton" style="padding: 15px 50px; font-size: 1.2em;">
+            Play Round
+        </button>
+        <div class="loading" id="loading">Playing...</div>
+    </div>
+</div>
+
+<div id="historyContainer"></div>
+
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{{ url_for('index') }}" class="button btn-secondary">← Back to Menu</a>
+</div>
+
+<script>
+    let selectedMove1 = null;
+    let selectedMove2 = null;
+    const gameMode = '{{ mode }}';
+    
+    function selectMove(button, move) {
+        // Find all buttons in the same .move-buttons container
+        const container = button.closest('.move-buttons');
+        container.querySelectorAll('.move-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        // Select this button
+        button.classList.add('selected');
+        selectedMove1 = move;
+    }
+    
+    function selectMove2(button, move) {
+        // Find all buttons in the same .move-buttons container
+        const container = button.closest('.move-buttons');
+        container.querySelectorAll('.move-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        // Select this button
+        button.classList.add('selected');
+        selectedMove2 = move;
+    }
+    
+    function playRound() {
+        if (!selectedMove1) {
+            showMessage('Please select a move for Player 1', 'error');
+            return;
+        }
+        
+        if (gameMode === 'a' && !selectedMove2) {
+            showMessage('Please select a move for Player 2', 'error');
+            return;
+        }
+        
+        document.getElementById('playButton').disabled = true;
+        document.getElementById('loading').style.display = 'block';
+        
+        const payload = {
+            first_move: selectedMove1,
+            second_move: gameMode === 'a' ? selectedMove2 : null
+        };
+        
+        fetch('/api/play', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('playButton').disabled = false;
+            
+            if (data.valid) {
+                // Deselect moves
+                document.querySelectorAll('.move-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                selectedMove1 = null;
+                selectedMove2 = null;
+                
+                // Update score
+                updateScore(data);
+                
+                // Show result
+                showResult(data);
+                
+                // Check if game is over
+                if (data.game_over) {
+                    showGameOver(data.winner);
+                    disableMoveButtons();
+                }
+            } else {
+                showMessage(data.error || 'Invalid move', 'error');
+            }
+        })
+        .catch(error => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('playButton').disabled = false;
+            showMessage('Error: ' + error, 'error');
+        });
+    }
+    
+    function updateScore(data) {
+        document.getElementById('score1').textContent = data.first_score;
+        document.getElementById('score2').textContent = data.second_score;
+        document.getElementById('draws').textContent = data.draws;
+    }
+    
+    function showResult(data) {
+        const container = document.getElementById('historyContainer');
+        
+        const moveSymbols = {
+            'k': '🪨 Rock',
+            'p': '📄 Paper',
+            's': '✂️ Scissors'
+        };
+        
+        let resultClass = 'draw';
+        let resultText = '🤝 Draw!';
+        
+        if (data.first_move === data.second_move) {
+            resultClass = 'draw';
+            resultText = '🤝 Draw!';
+        } else if (
+            (data.first_move === 'k' && data.second_move === 's') ||
+            (data.first_move === 's' && data.second_move === 'p') ||
+            (data.first_move === 'p' && data.second_move === 'k')
+        ) {
+            resultClass = 'win';
+            resultText = '🎉 Player 1 Wins!';
+        } else {
+            resultClass = 'lose';
+            resultText = '😢 Player 2 Wins!';
+        }
+        
+        const resultDiv = document.createElement('div');
+        resultDiv.className = `round-result ${resultClass}`;
+        resultDiv.innerHTML = `
+            <div style="margin-bottom: 10px; font-weight: bold; font-size: 1.1em;">${resultText}</div>
+            <div style="display: flex; justify-content: space-around;">
+                <div>
+                    <div style="color: #666; font-size: 0.9em;">Player 1</div>
+                    <div style="font-size: 1.2em; font-weight: bold;">${moveSymbols[data.first_move]}</div>
+                </div>
+                <div style="display: flex; align-items: center; color: #999;">vs</div>
+                <div style="text-align: right;">
+                    <div style="color: #666; font-size: 0.9em;">Player 2</div>
+                    <div style="font-size: 1.2em; font-weight: bold;">${moveSymbols[data.second_move]}</div>
+                </div>
+            </div>
+        `;
+        
+        if (!container.firstChild) {
+            container.innerHTML = '<h3 style="margin-bottom: 20px; color: #666;">Game History</h3>';
+        }
+        
+        if (container.querySelector('.round-result')) {
+            container.insertBefore(resultDiv, container.querySelector('.round-result'));
+        } else {
+            container.appendChild(resultDiv);
+        }
+    }
+    
+    function showMessage(message, type) {
+        const container = document.getElementById('messageContainer');
+        container.innerHTML = `<div class="message ${type}-message">${message}</div>`;
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 3000);
+    }
+    
+    function showGameOver(winner) {
+        const container = document.getElementById('gameOverContainer');
+        let message = '';
+        if (winner === 'player1') {
+            message = '🎊 Player 1 Wins the Game! 🎊';
+        } else if (winner === 'player2') {
+            message = '🎊 Player 2 Wins the Game! 🎊';
+        }
+        container.innerHTML = `<div class="game-over-message">${message}<div class="winner">First to 5 wins!</div></div>`;
+    }
+    
+    function disableMoveButtons() {
+        document.querySelectorAll('.move-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+        document.getElementById('playButton').disabled = true;
+    }
+    
+    // Load initial score
+    fetch('/api/status')
+        .then(response => response.json())
+        .then(data => {
+            updateScore({
+                first_score: data.first_score,
+                second_score: data.second_score,
+                draws: data.draws
+            });
+            
+            // Check if game is already over
+            if (data.game_over) {
+                showGameOver(data.winner);
+                disableMoveButtons();
+            }
+            
+            // Load history
+            if (data.history && data.history.length > 0) {
+                const container = document.getElementById('historyContainer');
+                container.innerHTML = '<h3 style="margin-bottom: 20px; color: #666;">Game History</h3>';
+                
+                data.history.forEach(round => {
+                    const moveSymbols = {
+                        'k': '🪨 Rock',
+                        'p': '📄 Paper',
+                        's': '✂️ Scissors'
+                    };
+                    
+                    let resultClass = 'draw';
+                    let resultText = '🤝 Draw!';
+                    
+                    if (round.first_move === round.second_move) {
+                        resultClass = 'draw';
+                        resultText = '🤝 Draw!';
+                    } else if (
+                        (round.first_move === 'k' && round.second_move === 's') ||
+                        (round.first_move === 's' && round.second_move === 'p') ||
+                        (round.first_move === 'p' && round.second_move === 'k')
+                    ) {
+                        resultClass = 'win';
+                        resultText = '🎉 Player 1 Wins!';
+                    } else {
+                        resultClass = 'lose';
+                        resultText = '😢 Player 2 Wins!';
+                    }
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `round-result ${resultClass}`;
+                    resultDiv.innerHTML = `
+                        <div style="margin-bottom: 10px; font-weight: bold; font-size: 1.1em;">${resultText}</div>
+                        <div style="display: flex; justify-content: space-around;">
+                            <div>
+                                <div style="color: #666; font-size: 0.9em;">Player 1</div>
+                                <div style="font-size: 1.2em; font-weight: bold;">${moveSymbols[round.first_move]}</div>
+                            </div>
+                            <div style="display: flex; align-items: center; color: #999;">vs</div>
+                            <div style="text-align: right;">
+                                <div style="color: #666; font-size: 0.9em;">Player 2</div>
+                                <div style="font-size: 1.2em; font-weight: bold;">${moveSymbols[round.second_move]}</div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(resultDiv);
+                });
+            }
+        });
+</script>
+{% endblock %}

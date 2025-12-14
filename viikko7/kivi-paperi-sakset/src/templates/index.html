@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Rock Paper Scissors - Game Mode{% endblock %}
+
+{% block content %}
+<h1>🎮 Rock Paper Scissors</h1>
+
+<h2>Select Game Mode</h2>
+
+<div class="button-group">
+    <a href="{{ url_for('game', mode='a') }}" class="button btn-primary">
+        👥 Player vs Player
+    </a>
+    <a href="{{ url_for('game', mode='b') }}" class="button btn-secondary">
+        🤖 Player vs AI
+    </a>
+    <a href="{{ url_for('game', mode='c') }}" class="button btn-secondary">
+        ⭐ Player vs Enhanced AI
+    </a>
+</div>
+
+<div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #eee;">
+    <h3 style="color: #666; margin-bottom: 15px; font-size: 1.2em;">How to Play</h3>
+    <div style="color: #888; line-height: 1.6;">
+        <p><strong>Available Moves:</strong></p>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+            <li><strong>k</strong> = Rock (Kivi)</li>
+            <li><strong>p</strong> = Paper (Paperi)</li>
+            <li><strong>s</strong> = Scissors (Sakset)</li>
+        </ul>
+        <p style="margin-top: 15px;"><strong>Rules:</strong></p>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+            <li>Rock beats Scissors</li>
+            <li>Scissors beats Paper</li>
+            <li>Paper beats Rock</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
