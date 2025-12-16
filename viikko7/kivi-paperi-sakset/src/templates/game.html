@@ -47,6 +47,11 @@
             <button class="move-btn" onclick="selectMove2(this, 'p')" title="Paper">📄<br><small>p</small></button>
             <button class="move-btn" onclick="selectMove2(this, 's')" title="Scissors">✂️<br><small>s</small></button>
         </div>
+            <div class="move-legend">
+            <span class="symbol">k = Rock (Kivi)</span>
+            <span class="symbol">p = Paper (Paperi)</span>
+            <span class="symbol">s = Scissors (Sakset)</span>
+        </div>
     </div>
     {% else %}
     <div class="vs-text">🤖 VS Computer</div>
@@ -232,7 +237,8 @@
         } else if (winner === 'player2') {
             message = '🎊 Player 2 Wins the Game! 🎊';
         }
-        container.innerHTML = `<div class="game-over-message">${message}<div class="winner">First to 5 wins!</div></div>`;
+        container.innerHTML = `<div class="game-over-message">${message}<div class="winner">First to 3
+             wins!</div></div>`;
     }
     
     function disableMoveButtons() {
